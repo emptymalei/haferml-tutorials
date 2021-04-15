@@ -31,5 +31,31 @@
                 "remote": "s3://haferml-rideindego/marshall/dataset/etl"
             }
         }
+    },
+    "preprocessing": {
+        "dataset": {
+            "local": "model/dataset",
+            "remote": "s3://haferml-rideindego/marshall/model/dataset",
+            "preprocessed": {
+                "name": "preprocessed.parquet",
+                "local": "model/dataset",
+                "remote": "s3://haferml-rideindego/marshall/model/dataset"
+            }
+        },
+        "features": [
+            "passholder_type",
+            "bike_type",
+            "trip_route_category",
+            "hour",
+            "weekday",
+            "month"
+        ],
+        "targets": [
+            "duration"
+        ],
+        "feature_engineering": {
+        },
+        "target_engineering": {
+        }
     }
 }

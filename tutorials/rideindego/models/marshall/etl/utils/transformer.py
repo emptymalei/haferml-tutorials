@@ -109,8 +109,8 @@ class TripDataCleansing:
         self.trip_data["bike_type"] = self.trip_data.bike_type.fillna("standard")
 
     def _normalize_coordinates(self):
-        """Bike coordinates have diverging types: str or float, normalizing to float
-        """
+        """Bike coordinates have diverging types: str or float, normalizing to float"""
+
         def convert_to_float(data):
             try:
                 return float(data)
@@ -135,9 +135,7 @@ class TripDataCleansing:
     def _save_all_trip_data(self):
         """Dump all trip data to the destination define in config"""
 
-        logger.debug(
-            self.trip_data.sample(10)
-        )
+        logger.debug(self.trip_data.sample(10))
 
         try:
             if self.target_local.endswith(".parquet"):

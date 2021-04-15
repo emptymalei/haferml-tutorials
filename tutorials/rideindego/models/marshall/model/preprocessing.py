@@ -1,13 +1,13 @@
+import datetime
 import os
 
 import click
+import pandas as pd
 import simplejson as json
 from dotenv import load_dotenv
 from loguru import logger
 
-from utils.fetch import DataDownloader, DataLinkHTMLExtractor
-from utils.fetch import get_page_html as _get_page_html
-
+logger.info(f"Experiment started at: {datetime.datetime.now()}")
 load_dotenv()
 
 
@@ -78,6 +78,40 @@ def construct_paths(config, base_folder=os.getenv("BASE_FOLDER")):
     return {**config, **config_recon}
 
 
+def load_data(data_path):
+    if data_path.endswith(".parquet"):
+        dataframe = pd.read_parquet(data_path)
+    else:
+        raise ValueError(f"Input path file format is not supported: {data_path}")
+
+    return dataframe
+
+
+class Preprocess:
+    """
+    Preprocess dataset
+
+    There is very little to preprocess in this example. But we will keep this class for illustration purpose.
+    """
+
+    def __init__(self, config):
+        self.config = config
+        self.feature_cols = self.config["features"]
+        self.target_cols = self.config["targets"]
+
+    def _drop_unused_columns(self, dataframe):
+
+        dataframe = dataframe[self.feature_cols + self.target_cols]
+
+        return dataframe
+
+    def run(self, dataframe):
+
+        dataframe = self._drop_unused_columns(dataframe)
+
+        return dataframe
+
+
 @click.command()
 @click.option(
     "-c",
@@ -86,32 +120,41 @@ def construct_paths(config, base_folder=os.getenv("BASE_FOLDER")):
     default=os.getenv("CONFIG_FILE"),
     help="Path to config file",
 )
-def extract(config):
+def preprocess(config):
 
     base_folder = os.getenv("BASE_FOLDER")
 
     _CONFIG = load_config(config)
 
-    etl_trip_data_config = get_config(_CONFIG, ["etl", "raw", "trip_data"])
-    etl_trip_data_config = construct_paths(etl_trip_data_config, base_folder)
-    logger.info(f"Using config: {etl_trip_data_config}")
+    preprocessed_data_config = get_config(
+        _CONFIG, ["preprocessing", "dataset", "preprocessed"]
+    )
+    preprocessed_data_config = construct_paths(preprocessed_data_config, base_folder)
+
+    transformed_trip_data_config = get_config(
+        _CONFIG, ["etl", "transformed", "trip_data"]
+    )
+    transformed_trip_data_config = construct_paths(
+        transformed_trip_data_config, base_folder
+    )
     # create folders
-    if not os.path.exists(etl_trip_data_config["local"]):
-        os.makedirs(etl_trip_data_config["local"])
+    if not os.path.exists(preprocessed_data_config["local"]):
+        os.makedirs(preprocessed_data_config["local"])
+    if not os.path.exists(transformed_trip_data_config["local"]):
+        os.makedirs(transformed_trip_data_config["local"])
 
-    # Download Raw Data
-    source_link = etl_trip_data_config["source"]
-    logger.info(f"Will download from {source_link}")
-    page = _get_page_html(source_link).get("data", {})
-    page_extractor = DataLinkHTMLExtractor(page)
-    links = page_extractor.get_data_links()
-    logger.info(f"Extracted links from {source_link}: {links}")
+    # load transformed data
+    df = load_data(transformed_trip_data_config["file_path"])
 
-    # Download data
-    dld = DataDownloader(links, data_type="zip", folder=etl_trip_data_config["local"])
-    dld.run()
+    # preprocess
+    pr = Preprocess(config=get_config(_CONFIG, ["preprocessing"]))
+    df = pr.run(df)
+
+    # save
+    df.to_parquet(preprocessed_data_config["file_path"], index=False)
+    logger.info(f'Saved preprocessed data to {preprocessed_data_config["file_path"]}')
 
 
 if __name__ == "__main__":
-    extract()
+    preprocess()
     print("END OF GAME")

@@ -1,13 +1,13 @@
+import datetime
 import os
 
 import click
+import pandas as pd
 import simplejson as json
 from dotenv import load_dotenv
 from loguru import logger
 
-from utils.fetch import DataDownloader, DataLinkHTMLExtractor
-from utils.fetch import get_page_html as _get_page_html
-
+logger.info(f"Experiment started at: {datetime.datetime.now()}")
 load_dotenv()
 
 
@@ -78,6 +78,18 @@ def construct_paths(config, base_folder=os.getenv("BASE_FOLDER")):
     return {**config, **config_recon}
 
 
+def load_data(data_path):
+    if data_path.endswith(".parquet"):
+        dataframe = pd.read_parquet(data_path)
+    else:
+        raise ValueError(f"Input path file format is not supported: {data_path}")
+
+    return dataframe
+
+
+
+
+
 @click.command()
 @click.option(
     "-c",
@@ -86,32 +98,27 @@ def construct_paths(config, base_folder=os.getenv("BASE_FOLDER")):
     default=os.getenv("CONFIG_FILE"),
     help="Path to config file",
 )
-def extract(config):
+def preprocess(config):
 
     base_folder = os.getenv("BASE_FOLDER")
 
     _CONFIG = load_config(config)
+    preprocessed_data_config = get_config(
+        _CONFIG, ["preprocessing", "dataset", "preprocessed"]
+    )
+    preprocessed_data_config = construct_paths(preprocessed_data_config, base_folder)
 
-    etl_trip_data_config = get_config(_CONFIG, ["etl", "raw", "trip_data"])
-    etl_trip_data_config = construct_paths(etl_trip_data_config, base_folder)
-    logger.info(f"Using config: {etl_trip_data_config}")
     # create folders
-    if not os.path.exists(etl_trip_data_config["local"]):
-        os.makedirs(etl_trip_data_config["local"])
+    if not os.path.exists(preprocessed_data_config["local"]):
+        os.makedirs(preprocessed_data_config["local"])
 
-    # Download Raw Data
-    source_link = etl_trip_data_config["source"]
-    logger.info(f"Will download from {source_link}")
-    page = _get_page_html(source_link).get("data", {})
-    page_extractor = DataLinkHTMLExtractor(page)
-    links = page_extractor.get_data_links()
-    logger.info(f"Extracted links from {source_link}: {links}")
+    # load transformed data
+    df = load_data(preprocessed_data_config["file_path"])
 
-    # Download data
-    dld = DataDownloader(links, data_type="zip", folder=etl_trip_data_config["local"])
-    dld.run()
+    # model
+
 
 
 if __name__ == "__main__":
-    extract()
+    preprocess()
     print("END OF GAME")
