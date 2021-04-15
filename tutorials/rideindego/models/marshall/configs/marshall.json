@@ -1,0 +1,35 @@
+{
+    "name": "rideindego prices",
+    "etl": {
+        "cache_folder": "cache",
+        "raw": {
+            "local": "data/raw",
+            "remote": "s3://haferml-rideindego/marshall/data/raw",
+            "stations": {
+                "name": "stations.parquet",
+                "local": "data/raw/stations",
+                "remote": "s3://haferml-rideindego/marshall/data/raw/stations"
+            },
+            "trip_data": {
+                "source": "https://www.rideindego.com/about/data/",
+                "name": "trips.parquet",
+                "local": "data/raw/trip_data",
+                "remote": "s3://haferml-rideindego/marshall/data/raw/trip_data"
+            }
+        },
+        "transformed": {
+            "local": "dataset/etl",
+            "remote": "s3://haferml-rideindego/marshall/dataset/etl",
+            "stations": {
+                "name": "stations.parquet",
+                "local": "dataset/etl",
+                "remote": "s3://haferml-rideindego/marshall/dataset/etl"
+            },
+            "trip_data": {
+                "name": "trips.parquet",
+                "local": "dataset/etl",
+                "remote": "s3://haferml-rideindego/marshall/dataset/etl"
+            }
+        }
+    }
+}

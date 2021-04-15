@@ -1,0 +1,4 @@
+pandas==1.2.3
+python-dotenv==0.16.0
+simplejson==3.17.0
+pyarrow==3.0.0
