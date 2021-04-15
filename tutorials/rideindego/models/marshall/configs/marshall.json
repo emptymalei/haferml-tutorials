@@ -71,6 +71,13 @@
             "targets": [
                 "duration"
             ],
+            "encoding": {
+                "categorical_columns": [
+                    "passholder_type",
+                    "bike_type",
+                    "trip_route_category"
+                ]
+            },
             "random_state": 42,
             "test_size": 0.3,
             "cv": {
