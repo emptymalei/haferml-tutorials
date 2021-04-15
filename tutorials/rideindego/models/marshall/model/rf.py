@@ -87,6 +87,14 @@ def load_data(data_path):
     return dataframe
 
 
+class Model:
+    """A model to predict the duration
+    """
+    def __init__(self, config):
+        self.name = "marshall random forest"
+        self.config = config
+
+
 
 
 
