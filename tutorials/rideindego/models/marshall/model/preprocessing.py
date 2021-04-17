@@ -64,7 +64,8 @@ def construct_paths(config, base_folder=os.getenv("BASE_FOLDER")):
     """
 
     if not config.get("local"):
-        raise Exception(f"{config} does not contain local key ")
+        logger.warning(f"{config} does not contain local key ")
+        return config
 
     config_recon = {}
     config_local = config["local"]
@@ -153,6 +154,8 @@ def preprocess(config):
     # save
     df.to_parquet(preprocessed_data_config["file_path"], index=False)
     logger.info(f'Saved preprocessed data to {preprocessed_data_config["file_path"]}')
+
+    return df
 
 
 if __name__ == "__main__":
