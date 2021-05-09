@@ -7,4 +7,4 @@ requests==2.25.1
 pyarrow==3.0.0
 scikit-learn==0.24.1
 category_encoders==2.2.2
-haferml==0.0.7
+haferml==0.0.9
