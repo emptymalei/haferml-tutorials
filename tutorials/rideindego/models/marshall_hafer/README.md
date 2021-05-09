@@ -27,14 +27,16 @@ The whole pipeline involves many different components:
 
 We ran into the following problems:
 
-- Get configs that is being shared by all the steps.
-- Construct file paths from configs.
-- Creating folders.
-- Run through a list of actions on the full dataset, in order. For example, when preprocessing the data, we might have an ordered list of functions.
-- Run through the data records in order, perform actions, and save.
-- Sync the data to and from the cloud.
+- Config management: sharing and applying configs in different steps.
+  - File path management.
+- Parameter management: hyperparameters are not systematically managed in training and testing.
+- Artifact management: save, reload, and preserve artifacts.
+  - Prepare folders for the artifcts;
+  - Sync the data to and from the cloud.
+- Pipeline mamangement: connecting the steps.
+  - Run through a list of actions on the full dataset, in order. For example, when preprocessing the data, we might have an ordered list of functions;
+  - Run through the data records in order, perform actions, and save.
 
-In summary, configuration management and parameter management are the most tedious part.
 
 ## How about Hafer ML
 
