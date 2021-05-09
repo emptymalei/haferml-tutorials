@@ -6,7 +6,6 @@ import click
 import joblib
 import numpy as np
 import pandas as pd
-import simplejson as json
 from dotenv import load_dotenv
 from haferml.blend.config import Config
 from haferml.model.pipeline import DataSetX, ModelSetX, ModelWorkflowX
@@ -205,43 +204,6 @@ class RandomForest(ModelWorkflowX):
         self.name = "marshall random forest"
 
 
-class Reload:
-    def __init__(self):
-        pass
-
-    def reload(self):
-        """
-        reload take the saved model and load it back
-        """
-        model_folder = self.artifacts["model"]["local"]
-        if not os.path.exists(os.path.join(self.base_folder, model_folder)):
-            raise Exception(
-                f"Model folder {os.path.join(self.base_folder, model_folder)} does not exist"
-            )
-
-        logger.info("Reload models")
-        self.model = joblib.load(
-            os.path.join(
-                self.base_folder,
-                model_folder,
-                self.artifacts["model"]["name"],
-            )
-        )
-
-    def predict(self, dataset):
-
-        res = None
-
-        # reload the model from artifacts
-        self.reload()
-
-        # preprocess the data
-        # not needed
-
-        # predict
-        res = self.model.predict(dataset[self.feature_cols].squeeze())
-
-        return res
 
 
 @click.command()
@@ -252,7 +214,13 @@ class Reload:
     default=os.getenv("CONFIG_FILE"),
     help="Path to config file",
 )
-def preprocess(config):
+@click.option(
+    "--test/--no-test",
+    type=bool,
+    default=False,
+    help="Flag for test",
+)
+def preprocess(config, test):
 
     base_folder = os.getenv("BASE_FOLDER")
 
@@ -266,7 +234,9 @@ def preprocess(config):
 
     # load transformed data
     logger.debug(f"Loading data ...")
-    df = load_data(preprocessed_data_config["name_absolute"]).sample(1000)
+    df = load_data(preprocessed_data_config["name_absolute"])
+    if test is True:
+        df = df.sample(1000)
 
     # model
     logger.debug(f"Prepare modelset and dataset")
