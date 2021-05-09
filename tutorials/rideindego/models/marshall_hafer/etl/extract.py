@@ -16,7 +16,7 @@ load_dotenv()
 @click.option(
     "-c",
     "--config",
-    type=click.Path(exists=True),
+    type=str,
     default=os.getenv("CONFIG_FILE"),
     help="Path to config file",
 )
